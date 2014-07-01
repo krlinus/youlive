@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head><title>Join the World Photo Mill</title>
+</head>
+<script type="text/javascript" src="/static/jquery-1.9.1.js"> </script>
+<script type="text/javascript" src="/static/ui/jquery-ui.js"> </script>
+<script language="javascript" src ="/static/common.js"> </script>
+<link rel="stylesheet" type="text/css" href="/static/formatting.css"></link>
+<!-- 
+<tbody><tr><th colspan="3" align="left">My Header</th></tr><tr><td><img src="/static/Photo-0019.jpg"></td><td><img src="/static/Photo-0019.jpg"></td><td><img src="/static/CAM00190.jpg"></td></tr><tr><td><img src="/static/fdlhgsdfhg.jpg"></td><td><img src="/static/Courtney_Cox.jpg"></td><td><img src="/static/photo.JPG"></td></tr><tr><td><img src="/static/photo.JPG"></td><td><img src="/static/6h2sbkfA.jpg"></td></tr></tbody>
+-->
+<script language="javascript">
+  $(function() {
+  var fl_list='{{imgs}}';
+  //alert(fl_list);
+  $.ajax({
+    dataType: "json",
+    url: "/f5handle",
+    data: {
+        "id":"0", "aid":"1"
+    },
+    success: function(data) {
+    // $.getJSON(function(data) {
+      var tabStr="";
+      var i=0;
+      th_str='<tr><th colspan=3 align="left">My Header</th></tr>';
+      for (n in data)
+      {
+        if((i==0) || (i %3 == 0))
+          tabStr += "<tr>";
+  
+        tabStr += '<td><img src="' + data[n] + '" /></td>';
+        if((i!=0) && (i %3) == 2)
+          tabStr += "</tr>";
+        i++;
+      }
+      if((i==0) || (i %3) != 2)
+          tabStr += "</tr>";
+      //alert(tabStr);
+      document.getElementById("t1").innerHTML=th_str+tabStr;
+     //})
+   }
+   })
+  });
+  
+</script>
+<body >
+<table id="t1"></table>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    
