@@ -1,0 +1,2 @@
+mailx -s 'testing attch 3' -a "MIME-Version: 1.0" -a 'Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1313743063-1346721547=:7141"'  submit < mm1
+
