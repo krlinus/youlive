@@ -4,23 +4,62 @@ import sys, email, os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 sys.path.append('/home/sunil/djcode/mysite/')
 from paw.models import FileInfo
+from paw.models import UserInfo
 from time import gmtime
 import calendar
+# Import smtplib for the actual sending function
+import smtplib
+import hashlib
+import PythonMagick
+
+# Import the email modules we'll need
+from email.mime.text import MIMEText
+import re
+
+def mailPasswdToNewUser(em,pss,f=None):
+  if(f):
+    f.write('mailPasswdToNewUser...enter\n')
+  msg_text='Use Username "'+em+'" and password "'+pss+'" to access your pictures at http://pennyappware.com:8002/ . Good luck!'
+  #me='"Admin, Pennyappware.com" <donotreply@pennyappware.com>'
+  me='donotreply@pennyappware.com'
+
+  if(f):
+    f.write('msg_text=%s\nme=%s\nem=%s\n' % (msg_text,me,em))
+  msg=MIMEText(msg_text)
+  msg['Subject'] = 'Your pennyappware.com account password'
+  msg['From'] = me
+  msg['To'] = em
+  
+  # Send the message via our own SMTP server, but don't include the
+  # envelope header.
+  s = smtplib.SMTP('smtp.comcast.net',587)
+  s.login('sunilramnarayan','LateTime9')
+  if(f):
+    f.write('inited smtplib\n')
+  s.sendmail(me, [em], msg.as_string())
+  if(f):
+    f.write('called sendmail\n')
+  s.quit()
 
 # from email.feedparser import FeedParser as fdp
 
 try:
   # open file stream
   file_name="logs/m.log"
+  #msgfile_name="logs/mmsg.log"
+  print 'opening %s\n' % file_name
   file = open(file_name, "w")
+  #print 'opening %s\n' % msgfile_name
+  #msgfile = open(msgfile_name, "w")
 except IOError:
   print 'log file open err'
   sys.exit(4)
 
-file_text=''
 em = email.message_from_file(sys.stdin) # Read message from Std Input
-for n,v in em.items():
-  file.write('%s --- %s\n' % (n,v))
+
+
+#for n,v in em.items():
+#  file.write('%s --- %s\n' % (n,v))
 
 if em.is_multipart():
   file_text = 'multipart? YES\n'
@@ -32,6 +71,9 @@ if em.is_multipart():
   for part in em.walk():
     filename = part.get_filename()
     if filename:
+      if ((filename[-4:]).upper() != '.JPG'):
+          next
+      filename=UserInfo.genPasswd(32) + '.jpg'
       #fpath='/home/sunil/djcode/mysite/paw/media/%s' % filename
       fpath='/data/%s' % filename
       try:
@@ -55,18 +97,28 @@ if em.is_multipart():
         file.write('opened filename: %s\n' % (filename))
         fid.write(filedata)
         fid.close()
+        img = PythonMagick.Image(fpath)
       except IOError as e:
         file.write('mailprocessor: Errored when writing :%s %s\n' % (e.errno, e.strerror))
       try:
         file_info = FileInfo()
-        file.write('created FileInfo...')
+        file.write('created FileInfo...\n')
         file_info.fileName=filename
         file_info.filePath='/data/'
 
-        file.write('assigned fileName...')
-        file_info.userName=em.get_all('From', [])
+        file.write('assigned fileName...\n')
+        from_fld=em.get_all('From', [])
+        file.write('from_fld = %s\n' % from_fld[0])
+        em_addr=''
+        emaddr_search=re.search('[A-z0-9.]+@[A-z0-9.]+',from_fld[0])
+        if(emaddr_search):
+          em_addr=emaddr_search.group(0)
+        file.write('em_addr = %s...\n' % em_addr)
+        (eml,dom)=em_addr.split('@')
+        file.write('eml,dom = %s,%s...\n' % (eml,dom))
+        file_info.userName=em_addr
 
-        file.write('assigned userName...')
+        file.write('assigned userName...\n')
         file_info.sendTime=calendar.timegm(gmtime())
 
         file.write('assigned sendTime...')
@@ -77,17 +129,23 @@ if em.is_multipart():
 
         file.write('saving...\n')
         file_info.save()
-        file.write('saved...')
-      except IntegrityError as inte:
-        file.write('mailprocessor: IntegrityError\n')
-      except DatabaseError as dbe:
-        file.write('mailprocessor: DatabaseError\n')
+        file.write('saved...\n')
+        uinfo_tbl=UserInfo()
+        userpass=uinfo_tbl.putNewUser(em_addr,file)
+        if(userpass != None):
+          #Send password back to user
+          file.write('Put UserInfo.. assigning pss\n')
+          mailPasswdToNewUser(file_info.userName,userpass,file)
+      #except IntegrityError as inte:
+      #  file.write('mailprocessor: IntegrityError\n')
+      #except DatabaseError as dbe:
+      #  file.write('mailprocessor: DatabaseError\n')
       except IOError as e:
         file.write('mailprocessor: Errored when writing :%s %s\n' % (e.errno, e.strerror))
       file.write('out ...\n')
     else:
       try:
-        file.write('No filename found for attachmt\n');
+        file.write('No filename found for attachmt\n')
       except IOError:
         print "mailprocessor: Errored when writing log(1)\n"
 else:
@@ -99,9 +157,9 @@ else:
 
 
 try:
-  file_text += '\n\nGOT MAIL!! \n\nContent: '
-  file_text += em.as_string()
-  file.write(file_text)
+  file_text += '\n\nGOT MAIL!! \n\n: '
+#  file_text += em.as_string()
+#  file.write(file_text)
 except IOError:
   print "mailprocessor: Errored when opening log\n"
   sys.exit(3)
