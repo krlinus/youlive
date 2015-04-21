@@ -1,4 +1,11 @@
 #!/usr/bin/python 
+# This is a heavily debug-statemented piece, as it handled incoming emails and 
+# there are lots of things that could go wrong. I have not taken the time to clean
+# this up yet, but at least, this worked fine at the time of its check-in, and would
+# work again if the setup is done properly again.
+# The setup for a mail interceptor like this is to some extent dependent on the mail solution
+# In this case I probably used one of the free email programs, perhaps dovecot or one of the more
+# popular softwares. 
 
 import sys, email, os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
