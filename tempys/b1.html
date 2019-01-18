@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head><title>Join the World Photo Mill</title>
+</head>
+<script type="text/javascript" src="/static/jquery-1.9.1.js"> </script>
+<script type="text/javascript" src="/static/ui/jquery-ui.js"> </script>
+<script language="javascript" src ="/static/common.js"> </script>
+<script type="text/javascript" src="/static/slider/Slides-SlidesJS-3/source/jquery.slides.js"> </script>
+<link rel="stylesheet" type="text/css" href="/static/formatting.css"></link>
+<script language="javascript">
+  function make_disp(data)
+  {
+      var container;
+      //$('#page .widget_bag').each(function () {$(this).remove();});
+      // $('#page .widget_bag').remove();
+
+      t=-300;
+      l=0;
+      i=0;
+      for (n in data)
+      {
+         if((i==0) || (i %3 == 0))
+         {
+            if (container) 
+            {
+              $('#page').append(container);
+            }
+            container = $('<div />');
+            container.addClass('widget_bag');
+            t += 500;
+            container.css('top',t);
+            l = 0;
+         }
+         i_tag=$('<img />');
+         i_tag.addClass('img_widget');
+         //i_tag.css('top',t);
+         i_tag.css('left',l);
+         i_tag.prop('src',data[n]);
+         i_tag.prop('id',n);
+         container.append(i_tag);
+         i++;
+         l += 500;
+         a_data.id=n;
+         a_data.nimgs=1;
+      }
+      $('.img_widget').each(function()  {
+         $(this).show('slow');
+       });
+  }
+  var a_data={ "id":"0","nimgs":"6" };
+  function ajax_succ(data){
+    if(a_data.nimgs==1)
+    {
+      i_tags=$('#page .widget_bag');
+      lst_id=n;
+      var tmp_id;
+      for (n in data)
+      {
+        lst=data[n];
+        lst_id=n;
+        for(k=0;k<i_tags.children.length;++k)
+        {
+          img_tags=i_tags[k];
+          for(l=0;l<img_tags.children.length;++l)
+          {
+            tmp=img_tags.children[l].src;
+            img_tags.children[l].src=lst;
+            lst=tmp;
+            tmp_id=img_tags.children[l].id;
+            img_tags.children[l].id=lst_id;
+            lst_id=tmp_id;
+          }
+        }
+        a_data.id=lst_id;
+      }
+      //alert('n='+n);
+    }
+    else
+    {
+      make_disp(data);
+    }
+ 
+  }
+  var jsonq= {
+      dataType: "json",
+      url: "/f5handle",
+      data: a_data,
+      success: ajax_succ,
+    };
+  
+  $(function bgn() {
+    var fl_list='{{imgs}}';
+    //alert(fl_list);
+
+    $.ajax(jsonq);
+    setTimeout( function (){ bgn(); }, '15000');
+    }
+  );
+</script>
+
+<body >
+<div id="page">
+<!--div class="title"/-->
+<!--div class="widget_bag"-->
+
+</div>
+</div>
+</body>
+</html>
+
+
+    

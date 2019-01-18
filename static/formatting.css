@@ -1,0 +1,41 @@
+/*
+table {
+width:100%;
+border:1px solid blue;
+}
+
+table > th { 
+background-color: Blue;
+color: White;
+}
+*/
+body
+{
+background-color:beige;
+}
+
+.widget_bag
+{
+width:100%;
+height:400px;
+position:absolute;
+background-color:Azure;
+border:3px solid purple;
+}
+
+.img_div
+{
+height:400px;
+width:300px;
+position: absolute;
+border:2px solid red;
+}
+
+.img_widget
+{
+width:300px;
+max-height:400px;
+position: absolute;
+display:block;
+float:bottom;
+}
